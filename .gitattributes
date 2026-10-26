@@ -1,0 +1,8 @@
+# 统一按 LF 存储，避免 Windows 上 clone/push 后 shell 脚本带 CRLF 无法执行
+* text=auto eol=lf
+
+*.png binary
+
+*.sh text eol=lf
+*.service text eol=lf
+Dockerfile text eol=lf

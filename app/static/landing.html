@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>豆包 30 天会员 · 兑换领取</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="aurora"></div>
+<div style="min-height:78vh;display:grid;place-items:center;width:100%">
+  <div class="card" style="max-width:430px;width:100%;text-align:center;padding:34px 26px">
+    <div class="logo" style="margin:0 auto 16px">豆</div>
+    <h1 style="margin:0 0 6px;font-size:21px">豆包 30 天会员 · 兑换领取</h1>
+    <p class="dim" style="margin:0 0 22px;font-size:13px;line-height:1.8">
+      请使用你收到的<b>专属兑换链接</b>打开本页<br>也可以直接在下方输入兑换码
+    </p>
+    <form onsubmit="go(event)" style="display:flex;gap:10px">
+      <input id="c" placeholder="输入兑换码，如 ABCDE-FGHJK-MNPQR-STUVW" autocomplete="off"
+        style="flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;
+               border-radius:12px;padding:13px 15px;font-size:16px;letter-spacing:2px;
+               font-family:Consolas,monospace;text-transform:uppercase;outline:none">
+      <button class="btn btn--primary" style="width:auto;margin:0;padding:0 22px">进入</button>
+    </form>
+    <p class="dim" style="margin:18px 0 0;font-size:12px">每个兑换码仅可领取一次</p>
+  </div>
+</div>
+<script>
+function go(e){
+  e.preventDefault();
+  const v = (document.getElementById('c').value || '').trim().toUpperCase();
+  if(!v) return;
+  location.href = '/' + encodeURIComponent(v);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c14">
+<title>豆包卡密 · 运营控制台</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/admin.css">
+<link rel="stylesheet" href="/console.css">
+</head>
+<body>
+<div class="aurora"></div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="brand">
+      <span class="logo">豆</span>
+      <div class="brand-tx"><b>豆包卡密</b><span>运营控制台</span></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="who">
+        <span class="who-k">当前身份</span>
+        <b class="who-v" id="whoV">加载中…</b>
+        <span class="who-tag lv1" id="whoRole">—</span>
+      </div>
+      <button class="btn ghost wide" id="pwdBtn" type="button" style="display:none">修改密码</button>
+      <button class="btn ghost wide" id="logoutBtn" type="button">退出登录</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="mtop">
+      <div class="mtop-l">
+        <h1 id="vt">仪表盘</h1>
+        <p class="dim" id="vsub">正在加载…</p>
+      </div>
+      <div class="row">
+        <button class="btn ghost mini" id="refreshBtn" type="button">刷新数据</button>
+      </div>
+    </header>
+    <div class="views" id="views"></div>
+  </main>
+</div>
+
+<div class="modal-root" id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+<script src="/console.js"></script>
+</body>
+</html>

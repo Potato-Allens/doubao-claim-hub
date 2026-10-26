@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c14">
+<title>兑换码后台 · 豆包 30 天会员</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div class="aurora"></div>
+
+<div class="topbar">
+  <h1><span class="logo">豆</span>兑换码后台</h1>
+  <div class="row">
+    <button class="btn ghost wide" onclick="load()">刷新</button>
+    <a class="btn ghost wide" style="text-decoration:none" href="#rdPanel">卡密分组</a>
+    <a class="btn ghost wide" style="text-decoration:none" href="/admin/logout">退出</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="stat acc"><div class="k">兑换码总数</div><div class="v" id="sTotal">0</div></div>
+  <div class="stat"><div class="k">未使用</div><div class="v" id="sUnused">0</div></div>
+  <div class="stat warn"><div class="k">已进入领取</div><div class="v" id="sVisiting">0</div></div>
+  <div class="stat acc"><div class="k">累计领取次数</div><div class="v" id="sClaims">0</div></div>
+  <div class="stat ok"><div class="k">已完成领取</div><div class="v" id="sDone">0</div></div>
+</div>
+
+<div class="panel">
+  <h2>批量生成兑换码</h2>
+  <div class="row">
+    <input id="count" type="number" min="1" max="100000" value="10" placeholder="数量">
+    <input id="note" placeholder="备注（可选，例如：闲鱼-8月批次）" style="flex:1;min-width:180px">
+    <button class="btn btn--primary wide" id="genBtn" onclick="gen()">生成兑换码</button>
+  </div>
+  <p class="muted" style="margin:10px 0 0" id="genHint">
+    <b>每张卡密固定只能成功领取 1 次</b>（R209 起不可修改）：领到后链接自动失效，需要再领请生成新卡密。
+  </p>
+  <p class="muted" style="margin:6px 0 0">每个码对应一条链接：<span class="code">&lt;本站地址&gt;/兑换码</span>，买家打开即进入领取页，无需再次验证。</p>
+
+  <div id="genWrap" class="hide" style="margin-top:14px">
+    <div class="row" style="margin-bottom:10px">
+      <b>本次生成 <span id="genCount">0</span> 条</b>
+      <span style="flex:1"></span>
+      <button class="btn ghost mini" onclick="cpURLs()">复制全部链接</button>
+      <button class="btn ghost mini" onclick="cpOnlyCodes()">只复制码</button>
+      <button class="btn ghost mini" onclick="exportGen('url')">导出链接 TXT</button>
+      <button class="btn ghost mini" onclick="exportGen('code')">导出码 TXT</button>
+    </div>
+    <div class="genout" id="genOut"></div>
+  </div>
+</div>
+
+<!-- R213 REDEEM PANEL START -->
+<div class="panel" id="rdPanel">
+  <div class="rd-head">
+    <div>
+      <h2 style="margin:0">卡密链接分组 · 兑换站</h2>
+      <p class="muted" style="margin:6px 0 0">
+        一个兑换码解锁一组卡密链接。买家在
+        <a class="rd-open" href="/redeem" target="_blank" rel="noopener">/redeem ↗</a>
+        输入兑换码后，可复制或下载 TXT。
+      </p>
+    </div>
+    <span class="rd-badge">R213</span>
+  </div>
+
+  <div class="row rd-form">
+    <label class="rd-field">
+      <span>数量含义</span>
+      <select id="rdMode">
+        <option value="per_group">每组链接数 × 兑换码数</option>
+        <option value="total">链接总数 ÷ 兑换码数</option>
+      </select>
+    </label>
+    <label class="rd-field">
+      <span id="rdALabel">每组链接数</span>
+      <input id="rdA" type="number" min="1" max="500" value="10" inputmode="numeric">
+    </label>
+    <label class="rd-field">
+      <span>兑换码数量</span>
+      <input id="rdB" type="number" min="1" max="500" value="5" inputmode="numeric">
+    </label>
+    <label class="rd-field rd-field--grow">
+      <span>备注（可选，便于对账）</span>
+      <input id="rdNote" type="text" maxlength="120" placeholder="例：10 月批次 / 代理商 A">
+    </label>
+    <button class="btn btn--primary wide" id="rdCreate" type="button">生成兑换码</button>
+  </div>
+
+  <p class="muted" id="rdCalc" style="margin:10px 0 0">将生成 5 个兑换码 × 每组 10 条 = 50 条卡密链接</p>
+
+  <div id="rdResult" class="hide">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="muted" id="rdResultMeta"></span>
+      <div class="row" style="gap:8px">
+        <button class="btn ghost mini" id="rdCopyCodes" type="button">复制全部兑换码</button>
+        <button class="btn ghost mini" id="rdDownload" type="button">下载 TXT</button>
+      </div>
+    </div>
+    <div class="rd-groups" id="rdGroups"></div>
+  </div>
+
+  <div class="row" style="justify-content:space-between;align-items:center;margin:18px 0 8px">
+    <b style="font-size:13px;color:#c9cfe4">历史批次</b>
+    <button class="btn ghost mini" id="rdRefresh" type="button">刷新</button>
+  </div>
+  <div class="tablewrap" style="max-height:320px">
+    <table>
+      <thead><tr><th>批次</th><th>备注</th><th>兑换码</th><th>已兑换</th><th>创建时间</th><th>操作</th></tr></thead>
+      <tbody id="rdBatchBody"><tr><td colspan="6" class="muted">加载中…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<!-- R213 REDEEM PANEL END -->
+
+<div class="panel">
+  <h2>兑换码列表</h2>
+  <div class="row" style="margin-bottom:12px">
+    <select id="fStatus" onchange="load()">
+      <option value="">全部状态</option>
+      <option value="unused">未使用</option>
+      <option value="visiting">已进入领取</option>
+      <option value="done">已完成领取</option>
+      <option value="disabled">已停用</option>
+    </select>
+    <select id="fBatch" onchange="load()"><option value="">全部批次</option></select>
+    <span style="flex:1"></span>
+    <span class="muted" id="fCount"></span>
+    <button class="btn ghost mini" onclick="copyFiltered()">复制当前全部链接</button>
+    <button class="btn ghost mini" onclick="exportTxt('url')">导出链接</button>
+    <button class="btn ghost mini" onclick="exportTxt('code')">只导出码</button>
+    <button class="btn ghost mini" onclick="exportTxt('csv')">导出 CSV</button>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>兑换码</th><th>链接（点一下即复制）</th><th>状态</th><th>已领</th><th>生成时间</th><th>使用时间</th><th>使用 IP</th><th>操作</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="row" style="margin-top:12px;justify-content:flex-end;flex-wrap:wrap;gap:8px">
+    <span class="muted" id="pageInfo">第 1 / 1 页</span>
+    <select id="pageSize" onchange="pageSizeChange(this.value)" style="width:auto">
+      <option value="20">每页 20 条</option>
+      <option value="50">每页 50 条</option>
+      <option value="100">每页 100 条</option>
+      <option value="200">每页 200 条</option>
+    </select>
+    <button class="btn ghost mini" id="pageFirst" onclick="pageFirst()">首页</button>
+    <button class="btn ghost mini" id="pagePrev" onclick="pagePrev()">上一页</button>
+    <button class="btn ghost mini" id="pageNext" onclick="pageNext()">下一页</button>
+    <button class="btn ghost mini" id="pageLast" onclick="pageLast()">末页</button>
+  </div>
+</div>
+
+<div class="panel" id="logPanel">
+  <h2>领取记录（扫码 / 成功 / 失败 · 带时间）</h2>
+  <div class="row" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <select id="logKind" onchange="onLogFilter()" style="width:auto">
+      <option value="">全部类型</option>
+      <option value="enter">进入领取</option>
+      <option value="scan">已扫码</option>
+      <option value="login">登录成功</option>
+      <option value="success">领取成功</option>
+      <option value="fail">未到账</option>
+    </select>
+    <input id="logCode" placeholder="按兑换码筛选（留空=全部）" style="min-width:200px"
+           onkeydown="if(event.key==='Enter') onLogFilter()">
+    <button class="btn ghost mini" id="logRefresh" onclick="onLogFilter()">查询</button>
+    <button class="btn ghost mini" onclick="showLogsOf('')">清空筛选</button>
+    <span style="flex:1"></span>
+    <span class="row" id="logStats" style="gap:6px"></span>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>时间</th><th>兑换码</th><th>类型</th><th>账号</th><th>对方 IP</th><th>说明</th>
+      </tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+  <div class="row" style="margin-top:12px;justify-content:flex-end;flex-wrap:wrap;gap:8px">
+    <span class="muted" id="logPageInfo">第 1 / 1 页</span>
+    <select id="logSize" onchange="logSizeChange(this.value)" style="width:auto">
+      <option value="20">每页 20 条</option>
+      <option value="50" selected>每页 50 条</option>
+      <option value="100">每页 100 条</option>
+      <option value="200">每页 200 条</option>
+    </select>
+    <button class="btn ghost mini" id="logPrev" onclick="logPrevPage()">上一页</button>
+    <button class="btn ghost mini" id="logNext" onclick="logNextPage()">下一页</button>
+  </div>
+  <p class="muted" style="margin:12px 0 0">
+    这里会记下<b>每一次</b>：对方<strong>打开兑换链接</strong>、<strong>扫码</strong>、<strong>领取成功</strong>、
+    <strong>未到账</strong>（含账号 / 对方 IP / 时间）。点上面列表里的「记录」按钮可按单个兑换码筛选。
+  </p>
+</div>
+
+<div class="panel" id="dlPanel">
+  <h2>一次性下载链接（发给客户，点开即下载，下载完立刻作废）</h2>
+  <div class="row" style="gap:10px">
+    <select id="dlSource" onchange="onDlSource()" style="width:auto">
+      <option value="batch">内容：卡密批次</option>
+      <option value="text">内容：自定义文本</option>
+    </select>
+    <select id="dlBatch" style="width:auto"><option value="">全部批次</option></select>
+    <select id="dlFmt" onchange="onDlSource()" style="width:auto">
+      <option value="url">格式：完整链接</option>
+      <option value="code">格式：只含卡密</option>
+      <option value="csv">格式：CSV 表格</option>
+    </select>
+  </div>
+  <div class="row" style="gap:10px;margin-top:10px">
+    <input id="dlName" placeholder="文件名（可留空，如 卡密-8月批次.txt）" style="flex:1;min-width:190px">
+    <select id="dlTtl" style="width:auto">
+      <option value="1">有效期 1 小时</option>
+      <option value="6">有效期 6 小时</option>
+      <option value="24" selected>有效期 24 小时</option>
+      <option value="72">有效期 3 天</option>
+      <option value="168">有效期 7 天</option>
+      <option value="0">永不过期</option>
+    </select>
+    <select id="dlHits" style="width:auto">
+      <option value="1" selected>只能下载 1 次</option>
+      <option value="2">可下载 2 次</option>
+      <option value="3">可下载 3 次</option>
+      <option value="5">可下载 5 次</option>
+      <option value="0">不限次数</option>
+    </select>
+    <button class="btn btn--primary wide" id="dlBtn" onclick="genDl()">生成下载链接</button>
+  </div>
+  <textarea id="dlText" class="hide" spellcheck="false"
+    style="width:100%;margin-top:10px;min-height:96px"
+    placeholder="自定义下载内容（纯文本，UTF-8）"></textarea>
+  <p class="muted" style="margin:10px 0 0">
+    生成后<b>把链接直接发给客户</b>，客户点开就开始下载，不用再传文件；
+    <b>下载完链接立刻销毁</b>，别人再打开只会看到「已失效」。
+  </p>
+
+  <div id="dlWrap" class="hide" style="margin-top:14px">
+    <div class="dlurl">
+      <b style="flex:0 0 auto">本次链接：</b>
+      <span class="link cp" id="dlUrl" onclick="cpDlUrl()" title="点击复制"></span>
+      <button class="btn ghost mini" onclick="cpDlUrl()">复制链接</button>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:12px">
+    <div class="row" style="justify-content:space-between;gap:8px">
+      <b>已生成的下载链接</b>
+      <span class="muted" id="dlStats">—</span>
+      <span style="flex:1"></span>
+      <select id="dlFilter" onchange="loadDl()" style="width:auto">
+        <option value="">全部状态</option>
+        <option value="active">可下载</option>
+        <option value="used">已下载</option>
+        <option value="expired">已过期</option>
+        <option value="revoked">已撤销</option>
+      </select>
+      <button class="btn ghost mini" onclick="loadDl()">刷新</button>
+    </div>
+    <div class="tablewrap" style="margin-top:10px">
+      <table>
+        <thead><tr>
+          <th>文件名</th><th>下载链接（点一下即复制）</th><th>大小</th><th>剩余/总次数</th>
+          <th>状态</th><th>生成时间</th><th>下载时间</th><th>下载 IP</th><th>操作</th>
+        </tr></thead>
+        <tbody id="dlBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>安全 · 谷歌验证器（2FA）</h2>
+  <div class="row" style="justify-content:space-between">
+    <div class="row" style="gap:10px">
+      <span class="sec-dot" id="secDot"></span>
+      <b id="secState">检查中…</b>
+      <span class="muted" id="secMeta"></span>
+    </div>
+    <div class="row">
+      <button class="btn ghost mini" id="bindBtn" onclick="totpSetup()">生成二维码绑定</button>
+      <button class="btn ghost mini hide" id="unbindBtn" onclick="totpDisable()">关闭两步验证</button>
+      <button class="btn ghost mini hide" id="recBtn" onclick="totpRecovery()">重新生成恢复码</button>
+    </div>
+  </div>
+
+  <div id="secSetup" class="hide" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px">
+    <div class="qrwrap"><div id="qrBox" class="qrimg"></div></div>
+    <p class="muted" style="margin:12px 0 6px">
+      ① 打开手机 <b>Google Authenticator / Microsoft Authenticator / 1Password</b> 等任意验证器 →
+      扫描上面二维码（扫不了就手动输入下面的密钥）<br>
+      ② 输入验证器里显示的 <b>6 位动态码</b> → 点「确认启用」
+    </p>
+    <p class="muted" style="margin:0 0 12px">手动密钥：
+      <span class="code" id="secSecret">—</span>
+      <button class="btn ghost mini" onclick="cpSecret()">复制密钥</button>
+    </p>
+    <div class="row">
+      <input id="secCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位动态码"
+             style="width:150px;text-align:center;letter-spacing:4px;font-family:Consolas,monospace">
+      <button class="btn btn--primary wide" id="enableBtn" onclick="totpEnable()">确认启用</button>
+    </div>
+  </div>
+
+  <div id="secRecovery" class="hide" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px">
+    <p class="muted" style="margin:0 0 8px">
+      ⚠️ <b>恢复码只显示这一次</b>，请立刻抄下来（换手机/丢手机时用它登录，每个只能用一次）：
+    </p>
+    <div class="reccodes" id="recList"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost mini" onclick="cpRecovery()">复制全部恢复码</button>
+      <button class="btn ghost mini" onclick="hideRecovery()">我已抄好，隐藏</button>
+    </div>
+  </div>
+
+  <p class="muted" style="margin:14px 0 0">
+    说明：绑定后登录需要「密码 + 动态码」；后台入口按 IP 限速（<span id="secRate">—</span>），
+    连续失败会自动封禁该 IP。全站已加 CSP / 点击劫持 / MIME 嗅探等安全响应头。
+  </p>
+</div>
+
+<div class="panel">
+  <h2>安全 · 访问控制（后台 IP 白名单 / 封禁）</h2>
+  <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div class="row" style="gap:12px;flex-wrap:wrap">
+      <label class="row" style="gap:8px;cursor:pointer;margin:0">
+        <input type="checkbox" id="wlOn" class="wzchk" onchange="saveWhitelist()">
+        <b>开启后台 IP 白名单</b>
+      </label>
+      <span class="muted">当前 IP：<span class="code" id="myIp">—</span></span>
+    </div>
+    <div class="row">
+      <button class="btn ghost mini" onclick="allowMyIp()">把当前 IP 加白</button>
+      <button class="btn btn--primary mini" onclick="saveWhitelist()">保存白名单</button>
+    </div>
+  </div>
+  <textarea id="wlList" spellcheck="false"
+    style="width:100%;min-height:92px;margin-top:12px;padding:10px 12px;border-radius:10px;
+           border:1px solid var(--line);background:rgba(0,0,0,.22);color:inherit;
+           font-family:Consolas,monospace;font-size:13px;line-height:1.6;resize:vertical"
+    placeholder="每行一个 IP 或网段，例如：&#10;203.0.113.20&#10;10.0.0.0/8"></textarea>
+  <p class="muted" style="margin:10px 0 0">
+    开启后，<b>只有名单里的 IP</b> 能看到后台页面和接口，其他 IP 一律拒绝（看起来就像这个路径不存在）。
+    白名单里的 IP 永远不会被自动封禁，放心加自己。
+  </p>
+
+  <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:14px">
+    <div class="row" style="justify-content:space-between">
+      <b>封禁列表</b><span class="muted" id="banCount">—</span>
+    </div>
+    <div class="tablewrap" style="margin-top:10px">
+      <table>
+        <thead><tr><th>IP</th><th>剩余</th><th>原因</th><th>操作</th></tr></thead>
+        <tbody id="banBody"></tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <input id="banIp" placeholder="手动封禁的 IP" style="min-width:190px">
+      <input id="banMin" type="number" value="60" min="1" title="封禁分钟数" style="width:110px">
+      <button class="btn ghost mini" onclick="doBan()">封禁该 IP</button>
+      <span class="muted">（登录连续失败会自动封禁，这里是手动加封）</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>设置</h2>
+  <div class="row">
+    <input id="pOld" type="password" placeholder="当前密码" style="min-width:170px">
+    <input id="pNew" type="password" placeholder="新密码（≥8 位）" style="min-width:170px">
+    <input id="pNew2" type="password" placeholder="确认新密码" style="min-width:170px">
+    <button class="btn btn--primary wide" id="pwdBtn" onclick="savePwd()">修改后台密码</button>
+  </div>
+  <p class="muted" style="margin:10px 0 0">
+    密码保存在本站数据库里（重启不丢），改完 <b>其他已登录的浏览器会自动失效</b>。
+    链接生成规则：<span class="code" id="baseHint">&lt;本站地址&gt;/兑换码</span>
+  </p>
+  <p class="muted" style="margin:16px 0 0">
+    <b>每张卡密固定 1 次领取</b>：该设置已下线，无法通过后台修改。
+  </p>
+</div>
+
+
+<div class="panel" id="rcPanel">
+  <h2>充值码（额度充值卡）</h2>
+  <div class="row">
+    <input id="rcAmount" type="number" min="1" max="100000" value="10" placeholder="每个码面额（张）" style="width:170px">
+    <input id="rcCount" type="number" min="1" max="2000" value="10" placeholder="生成数量" style="width:150px">
+    <input id="rcBatch" placeholder="批次（可选）" style="min-width:150px">
+    <input id="rcNote" placeholder="备注（可选）" style="flex:1;min-width:150px">
+    <button class="btn btn--primary wide" id="rcGenBtn" onclick="genRecharge()">生成充值码</button>
+  </div>
+  <p class="muted" style="margin:10px 0 0">
+    <b>充值码长期有效、一次性使用</b>：生成后发给代理商，代理商在控制台「充值」里输入，立刻给自己加上对应张数。
+    面额只存在服务器、不写进码里，码是 80 位随机（无法猜、无法伪造），每张只能用一次。
+  </p>
+  <div id="rcWrap" class="hide" style="margin-top:14px">
+    <div class="row" style="margin-bottom:10px">
+      <b>本次生成 <span id="rcGenCount">0</span></b>
+      <span style="flex:1"></span>
+      <button class="btn ghost mini" id="rcCopyBtn" onclick="cpRecharge()">复制全部</button>
+      <button class="btn ghost mini" onclick="exportRecharge()">导出 TXT</button>
+    </div>
+    <div class="genout" id="rcOut"></div>
+  </div>
+</div>
+
+<div class="panel" id="rcListPanel">
+  <h2>充值码列表</h2>
+  <div class="row" style="margin-bottom:12px">
+    <select id="rcFStatus" onchange="rcSetPage(0)">
+      <option value="">全部状态</option>
+      <option value="unused">未使用</option>
+      <option value="used">已充值</option>
+      <option value="void">已作废</option>
+    </select>
+    <select id="rcFBatch" onchange="rcSetPage(0)"><option value="">全部批次</option></select>
+    <input id="rcQ" placeholder="搜索充值码 / 使用者 / 备注" style="min-width:190px" onkeydown="if(event.key==='Enter')rcSetPage(0)">
+    <button class="btn ghost mini" onclick="rcSetPage(0)">查询</button>
+    <span style="flex:1"></span>
+    <span class="muted" id="rcStats">—</span>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>充值码</th><th>面额</th><th>状态</th><th>使用者</th><th>使用时间</th><th>生成时间</th><th>批次 / 备注</th><th>操作</th>
+      </tr></thead>
+      <tbody id="rcBody"></tbody>
+    </table>
+  </div>
+  <div class="row" style="margin-top:12px;justify-content:flex-end;flex-wrap:wrap;gap:8px">
+    <span class="muted" id="rcPageInfo">第 1 / 1 页</span>
+    <select id="rcPageSize" onchange="rcSetSize(this.value)" style="width:auto">
+      <option value="50">每页 50 条</option>
+      <option value="100">每页 100 条</option>
+      <option value="200">每页 200 条</option>
+    </select>
+    <button class="btn ghost mini" onclick="rcSetPage(0)">首页</button>
+    <button class="btn ghost mini" onclick="rcSetPage(rcPage-1)">上一页</button>
+    <button class="btn ghost mini" onclick="rcSetPage(rcPage+1)">下一页</button>
+    <button class="btn ghost mini" onclick="rcSetPage(rcPages-1)">末页</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/admin.js"></script>
+<script src="/admin_redeem_panel.js"></script>
+</body>
+</html>

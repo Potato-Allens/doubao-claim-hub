@@ -1,0 +1,38 @@
+# ---- 运行期数据（绝不入库）----
+data/
+logs/
+backups/
+*.db
+*.db-wal
+*.db-shm
+*.log
+data/.secret
+
+# ---- 备份 / 补丁残留 ----
+*.bak
+*.bak_*
+*.bak*
+*.r*[0-9]bak*
+*.r*bak
+*.orig
+*.rej
+*.patch
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# ---- 编辑器 / 系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
+
+# ---- 本地临时 ----
+_tmp/
+*.tar.gz

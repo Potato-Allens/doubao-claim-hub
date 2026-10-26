@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c14">
+<title>登录 · 豆包卡密运营控制台</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+.loginwrap{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.logincard{width:100%;max-width:390px;padding:32px 26px}
+.brand-lg{display:flex;justify-content:center;margin-bottom:14px}
+.brand-lg .logo{width:52px;height:52px;border-radius:17px;font-size:23px}
+.logincard h1{margin:0 0 6px;font-size:19px;text-align:center;letter-spacing:.2px}
+.logincard .dim{margin:0 0 20px;font-size:12.5px;text-align:center;line-height:1.7}
+.lf{display:block;margin-bottom:14px}
+.lf>span{display:block;font-size:12.5px;color:#a7aec4;margin-bottom:6px}
+.lf input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;
+  border-radius:12px;padding:13px 15px;font-size:15px;outline:none;font-family:inherit}
+.lf input:focus{border-color:rgba(91,140,255,.6);box-shadow:0 0 0 3px rgba(91,140,255,.15)}
+#lgBtn{margin-top:6px}
+.lgfoot{margin:18px 0 0;font-size:11.5px;text-align:center;color:var(--dim)}
+.lgfoot a{color:#8ea8ff;text-decoration:none}
+.lgfoot a:hover{text-decoration:underline}
+.sitebadge{display:none;align-items:center;justify-content:center;gap:6px;margin:0 0 14px;
+  padding:9px 12px;border-radius:11px;background:rgba(91,140,255,.12);
+  border:1px solid rgba(91,140,255,.28);font-size:12.5px;color:#cfd8ff;text-align:center}
+.sitebadge.on{display:flex}
+.sitebadge b{color:#fff}
+@media(max-width:480px){.logincard{padding:26px 20px}}
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+
+<div class="loginwrap">
+  <div class="card logincard">
+    <div class="brand-lg"><span class="logo">豆</span></div>
+    <h1>豆包卡密 · 运营控制台</h1>
+    <div class="sitebadge" id="siteBadge">专属入口：<b id="siteName">—</b></div>
+    <p class="dim" id="lgSub">代理商 / 子代理 请用上级分配的账号密码登录</p>
+
+    <form id="lgForm" autocomplete="on">
+      <label class="lf"><span>登录账号</span>
+        <input id="u" name="username" autocomplete="username" placeholder="请输入账号" autofocus></label>
+      <label class="lf"><span>登录密码</span>
+        <input id="p" name="password" type="password" autocomplete="current-password" placeholder="请输入密码"></label>
+      <button class="btn btn--primary" id="lgBtn" type="submit">登录</button>
+    </form>
+
+    <p class="lgfoot" id="lgFoot">总台管理员请走 <a href="/admin/login">后台入口</a></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  function toast(msg) {
+    var t = $("toast"); t.textContent = String(msg == null ? "" : msg); t.classList.add("show");
+    clearTimeout(window._tt); window._tt = setTimeout(function () { t.classList.remove("show"); }, 2800);
+  }
+
+  /* 解析专属入口：/a/s/<slug> 或 /a/s/<slug>/<子slug> */
+  var M = location.pathname.match(/^\/a\/s\/([^\/]+)(?:\/([^\/]+))?/);
+  var SITE = M ? decodeURIComponent(M[1]) : "";
+  var SUB = (M && M[2]) ? decodeURIComponent(M[2]) : "";
+  var HOME = SITE ? ("/a/s/" + SITE + "/console") : "/a";
+
+  if (SITE) {
+    /* 专属入口：藏掉总台的入口，只留自己的品牌 */
+    var foot = $("lgFoot");
+    if (foot) foot.style.display = "none";
+    $("lgSub").textContent = "请用上级分配给你的账号登录";
+    $("siteBadge").className = "sitebadge on";
+    try { localStorage.setItem("site_entry", "/a/s/" + SITE); } catch (e) {}
+    fetch("/a/api/site_info?site=" + encodeURIComponent(SITE) + "&sub=" + encodeURIComponent(SUB),
+          { cache: "no-store", credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && j.ok) { $("siteName").textContent = j.title || j.owner || "—"; return; }
+        $("siteName").textContent = "入口已失效";
+        if (j && j.message) toast(j.message);
+      })
+      .catch(function () {});
+  }
+
+  /* 已经登录过就直接进控制台 */
+  fetch("/a/api/me", { cache: "no-store", credentials: "same-origin" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { if (j && j.ok) location.href = HOME; })
+    .catch(function () {});
+
+  $("lgForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var u = ($("u").value || "").trim(), p = $("p").value || "";
+    if (!u || !p) { toast("请输入账号和密码"); return; }
+    var btn = $("lgBtn");
+    btn.disabled = true; btn.textContent = "登录中…";
+    try {
+      var url = SITE ? "/a/api/site_login" : "/a/login";
+      var payload = { username: u, password: p };
+      if (SITE) { payload.site = SITE; payload.sub = SUB; }
+      var r = await fetch(url, {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      var j = null;
+      try { j = await r.json(); } catch (err) { j = null; }
+      if (r.ok && j && j.ok) { location.href = HOME; return; }
+      var msg = (j && j.message) ? j.message
+        : (r.status === 403 ? "这个账号已被停用或封禁，请联系你的上级" : "账号或密码不对，请重新输入");
+      toast(msg);
+    } catch (err) {
+      toast("连不上服务器，请检查网络后重试");
+    }
+    btn.disabled = false; btn.textContent = "登录";
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<meta name="robots" content="noindex,nofollow">
+<title>卡密兑换中心</title>
+<link rel="stylesheet" href="/redeem.css?v=1">
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="orb orb--a"></div>
+  <div class="orb orb--b"></div>
+  <div class="orb orb--c"></div>
+  <div class="grid"></div>
+  <div class="noise"></div>
+</div>
+
+<main class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__mark">◆</span>
+      <span class="brand__name">REDEEM</span>
+      <span class="brand__sep"></span>
+      <span class="brand__sub">卡密兑换中心</span>
+    </div>
+    <span class="pill"><i class="dot"></i>安全兑换</span>
+  </header>
+
+  <section class="panel panel--input" id="stage-input">
+    <div class="kicker">STEP 01 / 输入兑换码</div>
+    <h1>兑换你的<br><em>卡密链接</em></h1>
+    <p class="sub">一个兑换码对应一组卡密链接。兑换成功后可逐条复制，或一键下载 TXT 文档。</p>
+
+    <form id="form" autocomplete="off" novalidate>
+      <div class="field" id="field">
+        <input id="code" name="code" type="text" inputmode="text" spellcheck="false"
+               autocomplete="one-time-code" autocapitalize="characters"
+               placeholder="XXXXX-XXXXX-XXXXX-XXXXX" maxlength="128" aria-label="兑换码">
+        <button type="button" class="ghost" id="paste" title="从剪贴板粘贴">粘贴</button>
+      </div>
+      <button type="submit" class="cta" id="submit">
+        <span class="cta__label">立即兑换</span>
+        <span class="cta__shine"></span>
+      </button>
+    </form>
+
+    <div class="meta-row">
+      <span class="hint">20 位兑换码 · 不区分大小写 · 可直接粘整条链接</span><!-- R705 -->
+      <span class="hint hint--warn">连续错误会被临时限制</span>
+    </div>
+    <div class="alert" id="alert" role="alert" hidden></div>
+  </section>
+
+  <section class="panel panel--result" id="stage-result" hidden>
+    <div class="success-head">
+      <div class="tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></div>
+      <div>
+        <div class="kicker">兑换成功</div>
+        <h2>卡密链接已解锁</h2>
+      </div>
+    </div>
+
+    <div class="chips">
+      <span class="chip">批次 <b id="r-batch">—</b></span>
+      <span class="chip">组号 <b id="r-group">—</b></span>
+      <span class="chip">数量 <b id="r-count">—</b></span>
+      <span class="chip">北京时间 <b id="r-time">—</b></span>
+    </div>
+
+    <div class="save-note">
+      <span class="save-note__icon">◈</span>
+      结果保存在本机；刷新后会先出现「查看上次结果」按钮，点开才展示链接，避免共用设备串号。
+    </div>
+
+    <div class="list-head">
+      <span>卡密链接</span>
+      <div class="list-actions">
+        <button class="ghost ghost--sm" id="copy-all" type="button">复制全部</button>
+        <button class="ghost ghost--sm" id="download" type="button">下载 TXT</button>
+      </div>
+    </div>
+    <ol class="links" id="links"></ol>
+
+    <div class="foot-actions">
+      <button class="danger-ghost" id="clear" type="button">清除当前页面数据</button>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>© <span id="year">2026</span> REDEEM CENTER</span>
+    <span class="foot__dot"></span>
+    <span>请妥善保管兑换结果</span>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/redeem.js?v=4"></script>
+</body>
+</html>

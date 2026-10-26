@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>后台登录</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="aurora"></div>
+<div style="min-height:78vh;display:grid;place-items:center;width:100%">
+  <div class="card" style="max-width:380px;width:100%;padding:34px 28px">
+    <div class="logo" style="margin:0 auto 16px">🔒</div>
+    <h1 style="margin:0 0 4px;font-size:19px;text-align:center">兑换码后台</h1>
+    <p class="dim" id="sub" style="margin:0 0 22px;font-size:13px;text-align:center">请输入管理密码</p>
+    <form method="post" action="/admin/login">
+      <input name="password" type="password" placeholder="管理密码" autofocus autocomplete="current-password"
+        style="width:100%;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;
+               border-radius:12px;padding:13px 15px;font-size:15px;outline:none;margin-bottom:14px">
+      <input name="code" id="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+        placeholder="谷歌验证器 6 位动态码" maxlength="11"
+        style="display:none;width:100%;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;
+               border-radius:12px;padding:13px 15px;font-size:17px;letter-spacing:4px;text-align:center;
+               outline:none;margin-bottom:14px;font-family:Consolas,monospace">
+      <button class="btn btn--primary" style="margin-top:0">登录</button>
+    </form>
+    <p class="dim" id="tip" style="margin:16px 0 0;font-size:11.5px;text-align:center;line-height:1.7"></p>
+  </div>
+</div>
+<script>
+  // 已启用两步验证时自动显示动态码输入框
+  fetch("/admin/api/authinfo", { cache: "no-store" }).then(r => r.json()).then(j => {
+    if (j.totp_enabled) {
+      const c = document.getElementById("code");
+      c.style.display = "block";
+      document.getElementById("sub").textContent = "管理密码 + 谷歌验证器动态码";
+      document.getElementById("tip").textContent = "两步验证已开启 · 动态码每 30 秒变化一次（紧急时可用恢复码）";
+      c.focus();
+    } else {
+      document.getElementById("tip").textContent = "建议登录后在「安全」里绑定谷歌验证器（2FA）";
+    }
+  }).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c14">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+<title>豆包 30 天会员 · 领取</title>
+<link rel="stylesheet" href="/style.css">
+<!-- R75：失败文案分档（可能延迟 / 定论失败）+ 重新核验按钮。只做视觉，不改 .py -->
+<style>
+.banner.pending{border-color:rgba(255,200,96,.38);
+  background:linear-gradient(90deg,rgba(255,200,96,.13),rgba(23,25,38,.72))}
+.banner.pending .bic{animation:bPulse 2.4s ease-in-out infinite}
+@keyframes bPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.banner.fresh{animation:bFade .32s ease}
+@keyframes bFade{from{opacity:.55}to{opacity:1}}
+.banner .bx .note{flex:1 1 100%;font-size:12px;color:#7ee7b0;background:rgba(57,217,138,.10);
+  border:1px solid rgba(57,217,138,.28);border-radius:12px;padding:8px 12px;line-height:1.6}
+.banner .bx .softnote{flex:1 1 100%;font-size:12px;color:#bfc7de;background:rgba(91,140,255,.10);
+  border:1px solid rgba(91,140,255,.26);border-radius:12px;padding:10px 12px;line-height:1.65;text-align:left}
+.banner .bx .recheck{flex:1 1 100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  margin-top:2px;padding:10px 15px;border-radius:12px;font:inherit;font-size:12.5px;font-weight:600;
+  color:#cfd8ff;background:rgba(91,140,255,.14);border:1px solid rgba(91,140,255,.45);cursor:pointer;
+  transition:background .2s,border-color .2s,opacity .2s}
+.banner .bx .recheck:hover{background:rgba(91,140,255,.24);border-color:rgba(91,140,255,.7)}
+.banner .bx .recheck[disabled]{opacity:.62;cursor:default}
+.banner .bx .recheck .rc-ico{display:inline-block;line-height:1}
+.banner .bx .recheck.loading .rc-ico{animation:spin .9s linear infinite}
+/* R82-M：境外号前置引导（不硬挡，只把预期讲清楚 + 一键切扫码） */
+.ph-foreign{margin:8px 0 2px;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.65;
+  color:#ffd9a0;background:rgba(255,200,96,.10);border:1px solid rgba(255,200,96,.34);text-align:left}
+.ph-foreign.hide{display:none}
+.ph-foreign .ph-foreign-tx{display:block}
+.ph-foreign .ph-foreign-go{display:block;width:100%;margin-top:8px;font-size:12.5px}
+.ph-tip b{color:#cfd8ff}
+</style>
+</head>
+<body>
+<div id="wzNotice2" style="position:relative;z-index:9999;margin:0;padding:9px 14px;background:linear-gradient(90deg,#0f5132,#157347);color:#eafff3;font-size:13px;line-height:1.55;text-align:center;font-weight:500">📣 <b>手机号通道近期发放率很低</b>，建议优先用「扫码领取」；人机验证会自动尝试（通常 1~3 分钟，最长约 5 分钟），请保持页面打开、勿重复点击。<span id="wzNotice2X" style="margin-left:10px;cursor:pointer;opacity:.85;text-decoration:underline">知道了</span></div><script>(function(){var k="wzNoticeOff3";try{if(localStorage.getItem(k)==="1"){var e=document.getElementById("wzNotice2");if(e)e.remove();return;}}catch(_){}var x=document.getElementById("wzNotice2X");if(x)x.onclick=function(){try{localStorage.setItem(k,"1")}catch(_){}var e=document.getElementById("wzNotice2");if(e)e.remove();};})();</script>
+<div id="segStat" style="display:none;position:relative;z-index:9998;margin:0;padding:7px 14px;background:rgba(20,30,55,.72);color:#cfe0ff;font-size:12.5px;line-height:1.5;text-align:center;border-bottom:1px solid rgba(120,160,255,.18)">📊 近 2 小时领取成功率：<span id="segStatTx">加载中…</span></div>
+<script>(function(){function pull(){fetch('/api/stats/segments?minutes=120',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(!d||!d.ok)return;var a=(d.items||[]).filter(function(i){return i.n>=3});if(!a.length)return;var s=a.slice(0,4).map(function(i){return '<b>'+i.seg+'</b> '+i.rate+'%（'+i.ok+'/'+i.n+'）'}).join(' · ');var box=document.getElementById('segStat'),tx=document.getElementById('segStatTx');var worst=null;a.forEach(function(i){if(i.n>=20&&i.rate<30&&(!worst||i.rate<worst.rate))worst=i});if(worst){box.style.background='rgba(120,20,30,.88)';box.style.color='#ffe3e3';tx.innerHTML='⚠ 当前 <b>'+worst.seg+'</b> 号段成功率偏低（近 2 小时 '+worst.rate+'%），建议优先改用 <b>+852</b> 新号 ｜ '+s;}else{box.style.background='rgba(20,30,55,.72)';box.style.color='#cfe0ff';tx.innerHTML=s+'<span style="opacity:.65">（样本 '+(d.total||0)+' 次）</span>';}box.style.display='block'}).catch(function(){})}pull();setInterval(pull,120000);})();</script>
+<div class="aurora"></div>
+
+<main class="wrap">
+  <section class="card qr-card">
+    <header class="head">
+      <div class="logo">豆</div>
+      <div class="head-txt">
+        <h1>领 30 天会员</h1>
+        <p class="sub">豆包电脑版 · 体验套餐</p>
+      </div>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="领取方式">
+      <button type="button" class="tab is-on" id="tabQr" role="tab" aria-selected="true" aria-controls="paneQr">扫码领取</button>
+      <button type="button" class="tab" id="tabPhone" role="tab" aria-selected="false" aria-controls="panePhone">手机号（备用）</button>
+    </div>
+
+    <div class="pane pane--qr is-on" id="paneQr">
+      <div class="qrbox" id="qrbox">
+        <img id="qr" alt="二维码" width="288" height="288">
+        <div class="scanline" id="scanline"></div>
+        <div class="qrmask show" id="qrmask"><div class="spinner"></div><span id="maskText">二维码生成中…</span></div>
+        <div class="done-stamp" id="stamp"><span id="stampText">已到账</span></div>
+      </div>
+      <!-- R423_MOBILE_QR：手机端同一台设备不好扫，给出保存/相册路径 -->
+      <div id="qrMobile" style="display:none;margin:10px 0 0;padding:10px 12px;border-radius:12px;background:rgba(120,160,255,.10);border:1px solid rgba(120,160,255,.25);font-size:13px;line-height:1.65;color:#dbe6ff;text-align:left">
+        📱 <b>在手机上领取</b>：长按上方二维码保存到相册 → 打开豆包 App →「扫一扫」→ 右上角「相册」选图；也可以用另一台手机直接扫。
+        <button type="button" id="qrSave" style="display:block;width:100%;margin-top:8px;padding:9px 12px;border-radius:10px;border:1px solid rgba(120,160,255,.35);background:rgba(120,160,255,.12);color:#dbe6ff;font-size:13px;font-weight:600">保存二维码图片</button>
+      </div>
+
+      <!-- R485_NEW_ACCOUNT：官方只给新账号发，提前说清楚 -->
+      <p class="ph-tip" style="margin:10px 0 0;text-align:left">💡 <b>用没领过福利的豆包账号扫码成功率最高</b>：官方按账号资格发放，领过的号/注册很久的老号通常不再发；同一个号重复扫不会变。</p>
+      <div class="timer">
+        <div class="bar"><i id="bar" style="width:0%"></i></div>
+        <div class="timer-row">
+          <span class="pill pill--wait" id="statusText">准备中</span>
+          <span class="dim mono" id="countdown">--s</span>
+        </div>
+        <div class="subline" id="subline"><span class="sdot run" id="sdot"></span><span id="subText">正在准备…</span></div>
+      </div>
+
+      <div class="acct" id="acctRow">
+        <span class="acct-k">登录账号</span>
+        <b class="acct-v" id="acctV">尚未登录</b>
+      </div>
+
+      <div class="cc-row cc-row--qr">
+        <span class="cc-k">账号地区</span>
+        <select class="cc-sel cc-sel--mini" id="qrCC" aria-label="账号地区"></select>
+      </div>
+
+      <button id="next" class="btn btn--primary">
+        <span class="ico">⟳</span><span id="nextText">换一个二维码</span>
+      </button>
+    </div>
+
+    <div class="pane pane--phone" id="panePhone">
+      <div class="ph-tip" id="phOldNote" style="color:#ffd28a;background:rgba(255,196,0,.08);border:1px solid rgba(255,196,0,.25);border-radius:10px;padding:9px 11px;margin:0 0 9px;line-height:1.7"><!-- R291_OLD_ACCOUNT_NOTE --><!-- R404_SMS_LOW_RATE --><!-- R485_NEW_ACCOUNT -->💡 <b>官方只给新账号发</b>：注册过豆包的老号基本领不到（占绝大多数失败）。想在短信通道拿到，请用<b>没注册过豆包的新手机号</b>；老号重复试不会变。条件允许优先走上方「<b>扫码领取</b>」，可以换账号、成功率更高。</div>
+      
+      <div class="cc-row">
+        <select class="cc-sel" id="phCC" aria-label="手机号国家/地区"></select>
+        <input class="inp inp--cc" id="phNum" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="手机号（可带 +国家码）">
+      </div>
+      <!-- R82-M 境外号前置引导：识别到非大陆区号就提示（不拦、不禁止发码），并给一键切扫码 -->
+      <div class="ph-foreign hide" id="phForeign" aria-live="polite">
+        <span class="ph-foreign-tx" id="phForeignTx"></span>
+        <button type="button" class="btn btn--ghost ph-foreign-go" id="phForeignGo">一键切到「扫码领取」（不受号码国家限制）</button>
+      </div>
+      <button id="phSend" type="button" class="btn btn--ghost">获取验证码</button>
+      <input class="inp" id="phCode" type="tel" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位短信验证码">
+      <div class="phmsg" id="phMsg" role="status" aria-live="polite"></div>
+      <!-- R409_ESCAPE：等待发码时给一条退出通道 -->
+      <button type="button" class="btn btn--ghost" id="phToQr" style="display:none;margin-top:-2px">等太久？改走「扫码领取」（更快）</button>
+      <button id="phLogin" type="button" class="btn btn--primary">
+        <span class="ico">🎁</span><span>立即领取 30 天会员</span>
+      </button>
+      <p class="ph-tip">支持 +86 / +852 / +1 等号码（带国家码自动识别，也可手动选）· <b>短信通道整体成功率偏低；非大陆号请直接用「扫码领取」</b> · 一个手机号仅可领取一次 30 天 VIP · 虚拟商品不支持退款</p>
+    </div>
+  </section>
+
+  <section class="card notice-card">
+    <h3 class="notice-title"><span class="notice-ico">📌</span>温馨提示</h3>
+    <ul class="notice-list">
+      <!-- R486_NO_BURN：实测验证：失败不写 claims、码不过期，可无限次换号重试 -->
+      <li class="r702-retry"><span class="n-ic">✦</span><span class="n-tx"><b>领不到不扣卡密</b>：同一个兑换码可以换账号反复重试，<b>成功才消耗</b>。老号没资格时，换一个没领过的新号再试即可</span></li>
+      <li><span class="n-ic">1</span><span class="n-tx"><b>一个手机号仅可领取一次</b> 30 天 VIP 会员</span></li>
+      <li><span class="n-ic">2</span><span class="n-tx">上面的手机号<b>可带国家码（如 +86 / +852 / +1）</b>，系统会自动按号码归属地区匹配出口；<b>扫码领取</b>会在登录后自动按你账号的地区切出口（也可手动选「账号地区」）</span></li>
+      <li><span class="n-ic">3</span><span class="n-tx"><b>虚拟商品，一经领取不支持退款</b></span></li>
+    </ul>
+  </section>
+</main>
+
+<aside class="banner hide" id="banner">
+  <span class="bic" id="bIc">🎉</span>
+  <div class="btx">
+    <b id="bTitle">领取成功</b>
+    <span class="bdesc" id="bDesc"></span>
+    <div class="bx" id="bExtra"></div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+<script src="/app.js"></script>
+<script>
+/* R82-M：境外号前置引导（不硬挡境外号：只是把预期讲清楚 + 给一键切扫码）。
+   独立于 app.js —— 点击 #tabQr 即可复用 app.js 已有的切换逻辑。 */
+(function () {
+  var DIALS = [["86", "CN"], ["852", "HK"], ["853", "MO"], ["886", "TW"], ["81", "JP"], ["82", "KR"],
+               ["65", "SG"], ["60", "MY"], ["44", "GB"], ["61", "AU"], ["49", "DE"], ["33", "FR"],
+               ["31", "NL"], ["84", "VN"], ["91", "IN"], ["66", "TH"], ["7", "RU"], ["1", "US"]];
+  /* R495_MEASURED：近 7 天真实数据 —— 短信通道 +1 3/50、+852 3/63（登录率 5~6%，到账 0）；
+     同类号段扫码通道约 40~46%。数据比・声明硬气：不是号坏了，是官方对境外号短信风控更严。 */
+  var TX = "实测（近 7 天）：非大陆号（__ISO__）走短信通道，登录成功率只有约 5%（+1 为 3/50，+852 为 3/63）；"
+         + "而同类号段走「扫码领取」约 40~46%。不是号码坏了，是官方对境外号的短信风控更严。"
+         + "建议直接点下面的按钮切扫码；坚持用短信的请保持页面打开、别重复点。";
+  var num = document.getElementById("phNum");
+  var cc = document.getElementById("phCC");
+  var box = document.getElementById("phForeign");
+  var tx = document.getElementById("phForeignTx");
+  var go = document.getElementById("phForeignGo");
+  if (!num || !box || !tx) return;
+
+  function detectIso() {
+    var s = String(num.value || "").replace(/[^\d+]/g, "");
+    var sel = cc ? String(cc.value || "") : "";
+    if (!s) return sel || "";
+    var intl = false;
+    if (s.charAt(0) === "+") { s = s.slice(1); intl = true; }
+    else if (s.slice(0, 2) === "00") { s = s.slice(2); intl = true; }
+    if (!intl && /^1[3-9]\d{9}$/.test(s)) return "CN";   /* 纯 11 位 1 开头 = 大陆 */
+    var byDial = DIALS.slice().sort(function (a, b) { return b[0].length - a[0].length; });
+    for (var i = 0; i < byDial.length; i++) {
+      var d = byDial[i];
+      if (d[0] === "1" && !intl) continue;
+      if (s.indexOf(d[0]) === 0) {
+        var nat = s.slice(d[0].length);
+        if (intl || (nat.length >= 4 && nat.length <= 15)) return d[1];
+      }
+    }
+    return sel || "";
+  }
+
+  function paint() {
+    var iso = detectIso();
+    var foreign = !!iso && iso !== "CN";
+    box.className = foreign ? "ph-foreign" : "ph-foreign hide";
+    if (foreign) tx.textContent = TX.replace("__ISO__", iso);
+  }
+
+  num.addEventListener("input", paint);
+  num.addEventListener("change", paint);
+  if (cc) cc.addEventListener("change", paint);
+  if (go) go.addEventListener("click", function () {
+    var t = document.getElementById("tabQr");
+    if (t) t.click();          /* app.js 负责真正的面板切换 */
+    paint();
+  });
+  document.addEventListener("DOMContentLoaded", paint);
+  window.addEventListener("load", paint);
+  setTimeout(paint, 800);      /* 国家下拉是异步填充的，稍后再刷一次 */
+  paint();
+})();
+</script>
+<!-- ★R502_STALE：部署/重启后自动发现「这是旧页面」，给一键刷新（不自动 reload，避免丢输入） -->
+<script>
+(function () {
+  var BOOT = null, shown = false;
+  function bar(msg) {
+    if (shown) return; shown = true;
+    var d = document.createElement("div");
+    d.id = "r502StaleBar";
+    d.setAttribute("role", "alert");
+    d.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483000;padding:10px 14px;" +
+      "font:500 13px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#12131a;" +
+      "background:linear-gradient(90deg,#ffd166,#ffc94d);box-shadow:0 8px 22px rgba(0,0,0,.45);" +
+      "display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center";
+    var t = document.createElement("span");
+    t.textContent = msg;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = "刷新页面";
+    b.style.cssText = "font:700 13px/1 inherit;padding:8px 16px;border:0;border-radius:10px;" +
+      "background:#12131a;color:#ffd166;cursor:pointer";
+    b.onclick = function () { location.reload(); };
+    d.appendChild(t); d.appendChild(b);
+    document.body.appendChild(d);
+  }
+  function check() {
+    if (document.hidden) return;
+    fetch("/healthz", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
+      var b = d && d.code && d.code.boot_cst;
+      if (!b) return;
+      if (BOOT === null) { BOOT = b; return; }
+      if (b !== BOOT) bar("服务已更新（" + b + "），当前页面还是旧版本，请刷新后继续。");
+    }).catch(function () {});
+  }
+  check();
+  setInterval(check, 45000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) check(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.log
+.git/
+.gitignore
+.venv/
+venv/
+data/devices.json
+docs/
+*.md
+data/
+logs/
+backups/
+*.bak*
+*.db

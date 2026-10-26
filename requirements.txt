@@ -1,0 +1,8 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+requests==2.32.3
+# TLS 指纹伪装（模拟 Chrome），避免被风控中间件拦；装不上会自动退回 requests
+curl_cffi>=0.13.0
+python-multipart>=0.0.9
+# 后台谷歌验证器绑定用（纯 Python，无 Pillow 依赖）
+qrcode>=7.4.2

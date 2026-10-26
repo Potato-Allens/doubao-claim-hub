@@ -1,0 +1,258 @@
+:root{
+  --bg:#0b0c14; --card:rgba(23,25,38,.72); --line:rgba(255,255,255,.08);
+  --txt:#eceef6; --dim:#8c92a8; --acc:#5b8cff; --acc2:#8b5bff;
+  --ok:#39d98a; --bad:#ff6b8a; --warn:#ffc860;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font-family:"Segoe UI",-apple-system,"Microsoft YaHei",system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;min-height:100vh;
+  padding:28px 16px 12px;overflow-x:hidden;
+}
+.aurora{position:fixed;inset:-40% -20%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(42% 34% at 18% 12%,rgba(91,140,255,.30),transparent 70%),
+    radial-gradient(38% 30% at 84% 6%,rgba(139,91,255,.26),transparent 70%),
+    radial-gradient(46% 36% at 70% 96%,rgba(57,217,138,.16),transparent 72%);
+  filter:blur(10px);animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-3%,2%,0) scale(1.08)}}
+
+/* 单列居中布局（移除右侧设备/记录栏） */
+.wrap{width:100%;max-width:460px;display:flex;flex-direction:column;gap:18px;align-items:stretch}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;
+  backdrop-filter:blur(18px);box-shadow:0 22px 60px rgba(0,0,0,.45)}
+
+/* header */
+.head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.logo{width:44px;height:44px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;
+  font-weight:800;font-size:20px;color:#fff;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 22px rgba(91,140,255,.45)}
+.head-txt h1{margin:0;font-size:19px;letter-spacing:.2px}
+.sub{margin:2px 0 0;font-size:12.5px;color:var(--dim)}
+
+/* qr */
+.qrbox{position:relative;width:min(288px,100%);aspect-ratio:1/1;margin:4px auto 0;border-radius:20px;
+  background:#fff;padding:10px;box-shadow:0 0 0 1px rgba(255,255,255,.10),0 18px 50px rgba(0,0,0,.5);
+  overflow:hidden}
+.qrbox img{width:100%;height:100%;display:block;border-radius:12px;image-rendering:pixelated}
+.scanline{position:absolute;left:8px;right:8px;height:3px;top:10px;border-radius:3px;opacity:0;
+  background:linear-gradient(90deg,transparent,#5b8cff,transparent);
+  box-shadow:0 0 16px 3px rgba(91,140,255,.9)}
+.qrbox.scanning .scanline{opacity:1;animation:scan 2.1s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes scan{0%{top:10px}50%{top:calc(100% - 14px)}100%{top:10px}}
+.qrmask{position:absolute;inset:0;display:none;flex-direction:column;gap:12px;align-items:center;
+  justify-content:center;background:rgba(255,255,255,.94);border-radius:20px;color:#444;font-size:13px}
+.qrmask.show{display:flex}
+.spinner{width:30px;height:30px;border-radius:50%;border:3px solid rgba(0,0,0,.12);
+  border-top-color:var(--acc);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.done-stamp{position:absolute;inset:0;display:none;place-items:center;border-radius:20px;
+  background:rgba(8,20,14,.72);backdrop-filter:blur(3px)}
+.done-stamp.show{display:grid;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+.done-stamp span{color:#39d98a;font-weight:800;font-size:22px;border:3px solid #39d98a;
+  padding:8px 18px;border-radius:14px;transform:rotate(-8deg);letter-spacing:2px}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* timer */
+.timer{margin-top:16px}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));
+  transition:width .35s linear,background .3s}
+.timer-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.pill{font-size:12.5px;padding:5px 12px;border-radius:999px;font-weight:600;
+  border:1px solid transparent;white-space:nowrap}
+.pill--wait{background:rgba(91,140,255,.16);color:#9fb8ff;border-color:rgba(91,140,255,.3)}
+.pill--scan{background:rgba(255,200,96,.16);color:#ffd479;border-color:rgba(255,200,96,.3)}
+.pill--run{background:rgba(139,91,255,.18);color:#c3aaff;border-color:rgba(139,91,255,.32)}
+.pill--ok{background:rgba(57,217,138,.16);color:#7ee7b0;border-color:rgba(57,217,138,.32)}
+.pill--bad{background:rgba(255,107,138,.16);color:#ffa3b6;border-color:rgba(255,107,138,.32)}
+
+/* buttons */
+.btn{margin-top:16px;width:100%;border:0;border-radius:14px;padding:14px;font-size:15px;font-weight:700;
+  color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .12s,box-shadow .2s,opacity .2s}
+.btn--primary{background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 12px 30px rgba(91,140,255,.35)}
+.btn--primary:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(91,140,255,.45)}
+.btn:active{transform:scale(.985)}
+.btn[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none}
+.btn .ico{font-size:18px;line-height:1}
+.tip{margin:12px 0 0;font-size:12px;color:var(--dim);text-align:center;line-height:1.7}
+
+/* 领取须知 */
+.notice-card{padding:18px 20px}
+.notice-title{margin:0 0 12px;font-size:14px;color:#c3c8dd;display:flex;align-items:center;gap:8px}
+.notice-ico{font-size:15px;line-height:1}
+.notice-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.notice-list li{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.65;color:#c3c8dd}
+.notice-list li .n-ic{flex:0 0 auto;width:20px;height:20px;border-radius:7px;display:grid;place-items:center;
+  font-size:11px;font-weight:700;color:#c3aaff;background:rgba(139,91,255,.16);
+  border:1px solid rgba(139,91,255,.3);margin-top:1px}
+.notice-list li .n-tx{min-width:0}
+.notice-list li b{color:#eceef6;font-weight:700}
+
+/* result banner */
+.banner{width:100%;max-width:460px;margin:18px 0 0;display:flex;align-items:center;gap:16px;
+  padding:16px 20px;border-radius:18px;border:1px solid var(--line);background:var(--card);
+  backdrop-filter:blur(18px);transition:border-color .3s,background .3s}
+.banner.hide{display:none !important}
+.banner .bic{font-size:34px;line-height:1;flex:0 0 auto}
+.banner .btx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.banner .btx > b{font-size:16px}
+.banner .bdesc{font-size:12.5px;color:var(--dim)}
+.banner .bx{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.banner .bx .chip{padding:7px 11px;font-size:12px}
+.banner.ok{border-color:rgba(57,217,138,.45);background:linear-gradient(90deg,rgba(57,217,138,.14),rgba(23,25,38,.72))}
+.banner.bad{border-color:rgba(255,107,138,.4);background:linear-gradient(90deg,rgba(255,107,138,.12),rgba(23,25,38,.72))}
+
+.chip{font-size:12.5px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.05);
+  border:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.chip b{color:#cfd4e6}
+.chip.ok b{color:#7ee7b0}
+.chip.warn b{color:#ffd479}
+.hint{font-size:12px;color:#ffd479;background:rgba(255,200,96,.10);border:1px solid rgba(255,200,96,.28);
+  border-radius:12px;padding:10px 12px;text-align:left;line-height:1.65}
+.mono{font-family:Consolas,"SF Mono",Menlo,monospace}
+.dim{color:var(--dim)}
+
+/* R56：实时状态副标题 + 登录账号条（固定高度，避免刷新时抖动） */
+.subline{display:flex;align-items:center;gap:8px;height:20px;margin-top:9px;color:#a7aec4;
+  font-size:12.5px;line-height:20px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.subline #subText{overflow:hidden;text-overflow:ellipsis}
+.sdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:var(--acc);
+  box-shadow:0 0 0 3px rgba(91,140,255,.14)}
+.sdot.live{background:var(--warn);box-shadow:0 0 0 3px rgba(255,200,96,.16);animation:sdotPulse 1.5s ease-in-out infinite}
+.sdot.run{background:var(--acc2);box-shadow:0 0 0 3px rgba(139,91,255,.16)}
+.sdot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(57,217,138,.18)}
+.sdot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(255,107,138,.18)}
+@keyframes sdotPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.acct{display:flex;align-items:center;gap:10px;height:46px;margin-top:12px;padding:0 14px;
+  border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);overflow:hidden;
+  transition:border-color .3s,background .3s}
+.acct.on{border-color:rgba(57,217,138,.45);background:rgba(57,217,138,.09)}
+.acct-k{flex:0 0 auto;font-size:12.5px;color:#8d95ab}
+.acct-v{min-width:0;font-size:13.5px;color:#eef1fa;font-family:Consolas,"SF Mono",Menlo,monospace;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct.on .acct-v{color:#8ff0bd}
+#countdown{display:inline-block;min-width:48px;text-align:right;font-variant-numeric:tabular-nums}
+#statusText{min-width:136px;justify-content:center}
+
+/* toast */
+.dot{width:3px;height:3px;border-radius:50%;background:#3d4257;display:inline-block}
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:rgba(20,22,34,.95);border:1px solid var(--line);color:#e6e9f5;padding:11px 18px;
+  border-radius:12px;font-size:13px;transition:all .25s;z-index:900;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* mobile */
+@media(max-width:480px){
+  body{padding:20px 12px 10px}
+  .card{padding:18px}
+  .qrbox{padding:8px}
+  .banner{padding:14px 16px;gap:12px}
+}
+
+/* ===== R57：领取方式 Tab + 手机号领取面板 ===== */
+.tabs{display:flex;gap:8px;margin:0 0 14px;padding:4px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(255,255,255,.04)}
+.tab{flex:1 1 0;min-width:0;border:0;background:transparent;color:#a7aec4;font:inherit;font-size:13.5px;
+  font-weight:700;padding:10px 4px;border-radius:11px;cursor:pointer;white-space:nowrap;
+  transition:background .22s,color .22s,box-shadow .22s}
+.tab:hover{color:#e6e9f5}
+.tab.is-on{color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));
+  box-shadow:0 8px 22px rgba(91,140,255,.35)}
+
+.pane{display:none}
+.pane.is-on{display:block;animation:panefade .22s ease both}
+@keyframes panefade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* 输入框（100% 宽，16px 防 iOS 自动缩放） */
+.inp{width:100%;max-width:100%;display:block;margin-top:12px;padding:14px;
+  border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+  color:var(--txt);font-size:16px;line-height:1.2;font-family:inherit;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s}
+.inp::placeholder{color:#6f7691}
+.inp:focus{border-color:rgba(91,140,255,.6);background:rgba(255,255,255,.07);
+  box-shadow:0 0 0 3px rgba(91,140,255,.16)}
+
+/* 次要按钮：获取验证码 */
+.btn--ghost{background:rgba(255,255,255,.06);color:#dfe3f2;border:1px solid var(--line);box-shadow:none}
+.btn--ghost:hover{background:rgba(255,255,255,.10);box-shadow:none;transform:translateY(-1px)}
+.btn--ghost[disabled]{background:rgba(255,255,255,.03);border-color:var(--line)}
+
+/* 手机号面板状态行 + 小字提示 */
+.phmsg{margin-top:10px;font-size:12.5px;line-height:1.55;color:#cfd4e6;word-break:break-all}
+.phmsg:empty{display:none}
+.phmsg.ok{color:#7ee7b0}
+.phmsg.bad{color:#ffa3b6}
+.ph-tip{margin:12px 0 0;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.75;
+  word-break:break-word}
+
+/* 超窄屏兜底：320px 也不换行、不溢出 */
+@media(max-width:480px){
+  .tab{font-size:13px;padding:9px 3px}
+  .inp{font-size:16px}
+}
+@media(max-width:340px){
+  .tabs{gap:6px}
+  .tab{font-size:12px;padding:9px 2px}
+  .ph-tip{font-size:11px}
+}
+/* 国家/地区选择行（R68） */
+.cc-row{display:flex;gap:10px;align-items:center;margin-top:12px}
+.cc-row--qr{margin-top:10px}
+.cc-row .inp--cc{margin-top:0;flex:1 1 auto;min-width:0}
+.cc-k{flex:0 0 auto;font-size:12.5px;color:#8d95ab}
+.cc-sel{flex:0 0 auto;max-width:44%;padding:12px 10px;border-radius:13px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:var(--txt);font-size:14px;font-family:inherit;outline:none;
+  -webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+.cc-sel:focus{border-color:rgba(91,140,255,.6);box-shadow:0 0 0 3px rgba(91,140,255,.16)}
+.cc-sel--mini{max-width:60%}
+.cc-sel option{background:#161a26;color:#eef1fa}
+@media (max-width:420px){
+  .cc-row{flex-wrap:wrap}
+  .cc-sel{max-width:100%;width:100%}
+  .cc-row .inp--cc{width:100%}
+}
+
+/* R67：失败原因要能看全。副标题原设计是 nowrap+省略号（防抖动），
+   可长文案会被截成 "（+86..."；终态（fail/error）才允许换行，过程中仍保持固定高度。 */
+.subline.wrap{height:auto;min-height:20px;align-items:flex-start;white-space:normal;line-height:1.6}
+.subline.wrap #subText{white-space:normal;word-break:break-word;overflow:visible;text-overflow:clip;flex:1 1 auto}
+.subline.wrap .sdot{margin-top:6px}
+
+/* 声明深色配色：防止手机浏览器的「强制深色/自动深色」把按钮反色成白底白字 */
+:root{color-scheme:dark}
+
+/* ★R505_STALE_TRUTH：二维码已过期且不会自动换 → 蒙灰 + 明确指路（别再让买家对着死码扫） */
+#qrbox.stale img{opacity:.12;filter:grayscale(1)}
+#qrbox.stale::after{content:"二维码已过期\A点下方「换一个二维码」继续";white-space:pre;position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:0 22px;
+  font-weight:700;font-size:15px;line-height:1.75;color:#ffd166;background:rgba(11,12,20,.55);border-radius:16px}
+
+/* ★R685：领取成功后把二维码盖住，防止买家对着「已作废的旧码 / 自动换出的新码」再扫一次 */
+#qrbox.isdone img{opacity:.08;filter:grayscale(1) blur(2px);pointer-events:none}
+#qrbox.isdone .scanline{opacity:0!important}
+#qrbox.isdone::after{content:"✅ 已领取成功\A无需再扫码";white-space:pre;position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:0 22px;
+  font-weight:800;font-size:18px;line-height:1.8;color:#39d98a;background:rgba(8,20,14,.72);border-radius:16px}
+
+/* ★R702：领取成功后收起操作区 —— 只留成功信息，避免买家对着作废码再扫 */
+body.claimed .tabs,
+body.claimed #qrMobile{display:none!important}
+body.claimed #qrbox.isdone{cursor:default}
+
+/* ★R702b：成功页再收一层 —— 二维码区变成一条「已领取」横幅，去掉引导换号的提示与地区选择 */
+body.claimed #qrbox{height:124px;aspect-ratio:auto;background:rgba(70,214,152,.06);
+  box-shadow:inset 0 0 0 1px rgba(70,214,152,.28)}
+body.claimed #qrbox img{display:none}
+body.claimed .notice-list li.r702-retry{display:none}
+body.claimed .cc-row--qr{display:none}
+
+/* ★R702c：成功卡片的图标贴着标题，不要垂到卡片中间 */
+.banner.ok{align-items:flex-start}
+
+/* R703: success is terminal; never offer another QR on the success screen */
+body.claimed #next{display:none!important}

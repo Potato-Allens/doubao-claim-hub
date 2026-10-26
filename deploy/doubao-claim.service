@@ -1,0 +1,39 @@
+# systemd 模板（deploy/install.sh 会自动生成一份到 /etc/systemd/system/doubao-claim.service）
+# 手动部署时：把本文件复制过去，改好路径/密码，再 systemctl daemon-reload && systemctl enable --now doubao-claim
+[Unit]
+Description=Doubao Claim (QR gift claim + redeem-code admin)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/doubao-claim
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Asia/Shanghai
+# 设备码来源：random=本地随机（默认，零依赖）| pool=读 data/devices.json 预注册设备池
+Environment=MODE=random
+# 1=必须带有效卡密才能进领取页（对外放卡密时保持 1）
+Environment=REQUIRE_CODE=1
+# 每张卡密允许成功领取次数（0 = 不限次，一码可反复领）
+Environment=CLAIMS_PER_CODE=0
+# 到账核验重试轮数（每轮间隔 6s）
+Environment=VERIFY_RETRY=3
+# 1=领取结束后自动换新二维码
+Environment=AUTO_NEXT=0
+# 同时在线的领取会话上限
+Environment=MAX_SESSIONS=150
+Environment=DATA_DIR=/root/doubao-claim/data
+# ★ 后台密码，务必修改
+Environment=ADMIN_PASSWORD=CHANGE_ME_PLEASE
+# 走域名/反代时打开（生成链接就会用域名）
+#Environment=BASE_URL=https://claim.example.com
+# 固定 cookie 密钥（可选，不设则自动生成到 data/.secret）
+#Environment=SITE_SECRET=
+ExecStart=/root/doubao-claim/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8080 --workers 1 --no-access-log --timeout-keep-alive 30
+Restart=always
+RestartSec=3
+StandardOutput=append:/root/doubao-claim/logs/app.log
+StandardError=append:/root/doubao-claim/logs/app.log
+
+[Install]
+WantedBy=multi-user.target

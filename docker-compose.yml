@@ -1,0 +1,32 @@
+services:
+  doubao-claim:
+    build: .
+    image: doubao-claim:latest
+    container_name: doubao-claim
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # 设备码来源：random = 纯本地随机生成设备指纹（零依赖，推荐）
+      #             pool   = 使用 data/devices.json 里预注册的真实设备码
+      MODE: "random"
+      # ★ 后台密码，上线务必修改（默认 CHANGE_ME_PLEASE，不改等于裸奔）
+      ADMIN_PASSWORD: "CHANGE_ME_PLEASE"
+      # 1 = 必须带有效卡密才能进领取页；0 = 任何人可直接打开（内网自用）
+      REQUIRE_CODE: "1"
+      # 每张卡密允许成功领取次数（0 = 不限次，一码可反复领；也可在 /admin → 设置 里改）
+      CLAIMS_PER_CODE: "0"
+      # 到账核验重试轮数（每轮间隔 6 秒）
+      VERIFY_RETRY: "3"
+      # 领取结束后是否自动换新二维码（1 开 / 0 关）
+      AUTO_NEXT: "0"
+      # 同时在线的领取会话上限
+      MAX_SESSIONS: "150"
+      # 走域名/反代时设置（生成链接用它）；留空则按请求 Host 自动推断
+      # BASE_URL: "https://claim.example.com"
+      # 固定 cookie 密钥（可选）
+      # SITE_SECRET: ""
+      TZ: Asia/Shanghai
+    volumes:
+      # 放卡密库 data/codes.db 与（pool 模式）devices.json；持久化，重启不丢卡密
+      - ./data:/app/data

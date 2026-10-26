@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07090f">
+<meta name="robots" content="noindex,nofollow">
+<title>兑换码管理 · 后台</title>
+<link rel="stylesheet" href="/admin_redeem.css?v=1">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="orb a"></div><div class="orb b"></div><div class="grid"></div></div>
+
+<main class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">◆</span>
+      <span class="name">REDEEM ADMIN</span>
+      <span class="sep"></span>
+      <span class="sub">兑换码 / 卡密链接分组</span>
+    </div>
+    <nav class="nav">
+      <a href="/admin">总后台</a>
+      <a href="/redeem" target="_blank" rel="noopener">前台预览</a>
+    </nav>
+  </header>
+
+  <section class="stats" id="stats">
+    <div class="stat"><span class="stat__k">批次总数</span><b id="s-batches">—</b></div>
+    <div class="stat"><span class="stat__k">兑换码</span><b id="s-codes">—</b></div>
+    <div class="stat"><span class="stat__k">已兑换</span><b id="s-used">—</b></div>
+    <div class="stat"><span class="stat__k">待兑换</span><b id="s-left">—</b></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <div>
+        <div class="kicker">CREATE / 批量生成</div>
+        <h1>创建兑换码</h1>
+        <p class="sub">一个兑换码解锁一组卡密链接。选择数量含义后填写，右侧会实时计算总量。</p>
+      </div>
+    </div>
+
+    <form id="create-form" class="grid-form" autocomplete="off">
+      <label class="lbl">
+        <span>数量含义</span>
+        <select id="mode">
+          <option value="per_group">每组卡密链接数 × 兑换码数</option>
+          <option value="total">卡密链接总数 ÷ 兑换码数</option>
+        </select>
+      </label>
+      <label class="lbl">
+        <span id="lab-a">每组卡密链接数量</span>
+        <input id="num-a" type="number" min="1" max="500" value="10" inputmode="numeric">
+      </label>
+      <label class="lbl">
+        <span>兑换码数量</span>
+        <input id="num-b" type="number" min="1" max="500" value="5" inputmode="numeric">
+      </label>
+      <label class="lbl lbl--wide">
+        <span>备注（可选，便于对账）</span>
+        <input id="note" type="text" maxlength="120" placeholder="例：10 月批次 / 代理商 A">
+      </label>
+
+      <div class="calc" id="calc">
+        <span>将生成</span>
+        <b id="calc-codes">5</b><span>个兑换码</span>
+        <span class="calc__x">×</span>
+        <b id="calc-per">10</b><span>条/组</span>
+        <span class="calc__x">=</span>
+        <b id="calc-total">50</b><span>条卡密链接</span>
+      </div>
+
+      <button type="submit" class="cta" id="create-btn"><span>生成兑换码</span></button>
+      <div class="alert" id="alert" hidden></div>
+    </form>
+  </section>
+
+  <section class="panel" id="result-panel" hidden>
+    <div class="panel__head panel__head--row">
+      <div>
+        <div class="kicker">CREATED / 生成结果</div>
+        <h2>兑换码已生成</h2>
+        <p class="sub" id="result-sub">请立即下载或复制，兑换码只在本页展示。</p>
+      </div>
+      <div class="actions">
+        <button class="ghost" type="button" id="copy-codes">复制全部兑换码</button>
+        <button class="ghost" type="button" id="download-result">下载 TXT</button>
+      </div>
+    </div>
+    <div class="result-list" id="result-list"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head panel__head--row">
+      <div>
+        <div class="kicker">BATCHES / 批次</div>
+        <h2>历史批次</h2>
+      </div>
+      <button class="ghost" type="button" id="refresh">刷新</button>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>批次</th><th>备注</th><th>兑换码</th><th>已用</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody id="batch-body"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer__mask" data-close="1"></div>
+    <div class="drawer__panel">
+      <div class="drawer__head">
+        <h3 id="drawer-title">批次详情</h3>
+        <button class="ghost ghost--sm" type="button" data-close="1">关闭</button>
+      </div>
+      <div class="drawer__body" id="drawer-body"></div>
+    </div>
+  </div>
+
+  <footer class="foot">R213 · 兑换码只绑定单组卡密链接 · 服务端仅以 HMAC 索引校验</footer>
+</main>
+<div class="toast" id="toast"></div>
+<script src="/admin_redeem.js?v=1"></script>
+</body>
+</html>
