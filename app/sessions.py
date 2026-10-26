@@ -2035,7 +2035,7 @@ class Session:
         _etxt = ""
         if _exits and _exit:
             _ip1, _ip2 = _exits.split("（")[0], _exit.split("（")[0]
-            # ★R71: 只有「国家变了」才叫跳变；同国家换 IP 是代理的正常行为（1024 的粘性出口约 100~170s 换一个 IP），
+            # ★R71: 只有「国家变了」才叫跳变；同国家换 IP 是代理的正常行为（粘性出口约 100~170s 换一个 IP），
             #   以前一律写「中途跳变」会把正常换 IP 也标成失败原因，复盘时误导。
             _cc1 = (_exits.split("（")[1].rstrip("）") if "（" in _exits else "")
             _cc2 = (_exit.split("（")[1].rstrip("）") if "（" in _exit else "")

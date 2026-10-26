@@ -24,7 +24,7 @@ try:
 except ImportError:  # pragma: no cover
     requests = None
 
-# ---- 默认配置（用户给的 1024 账号，可在后台改） ----
+# ---- 默认配置（在后台「出口代理」里改成你自己的账号） ----
 DEFAULTS = {
     "enabled": False,
     "mode": "api",                     # api | list | off
@@ -138,7 +138,7 @@ def set_config(**kw) -> dict:
 def _sid_for(key: str, digits: int) -> str:
     """[旧逻辑，仅作兜底] key（兑换码）-> 哈希 sid；无 key 时随机。
 
-    ★R73 起不再默认使用：1024 是「按 sid 绑定出口节点」，`region-XX` 只在该 sid **第一次**使用时生效
+    ★R73 起不再默认使用：该服务商是「按 sid 绑定出口节点」，`region-XX` 只在该 sid **第一次**使用时生效
     （线上实测：同一个 sid 依次请求 region-US / region-HK / region-US，出口 IP 一模一样 203.0.113.30/US）。
     所以 sid = sha256(code) 会导致「某张码一旦在旧策略下绑到 HK 节点，之后就算 region-US 也永远拿 HK 出口」。
     现在 lease() 会给新码**现场随机**一个 sid 并记进 _sid_override（进程内保持稳定）。
@@ -469,7 +469,7 @@ def _probe(p: dict) -> dict:
             return {"ok": True, "ip": body, "ms": ms}
         low = body.lower()
         if "forbidden ip" in low or (sc == 403 and "not supported" in low):
-            return {"ok": False, "error": "代理拒绝了本机出口 IP（该 IP 未加入 1024 后台白名单）", "ms": ms, "detail": body[:120]}
+            return {"ok": False, "error": "代理拒绝了本机出口 IP（该 IP 未加入代理服务商的白名单）", "ms": ms, "detail": body[:120]}
         if sc == 403:
             return {"ok": False, "error": "代理返回 403（被拒：检查白名单或目标域名）", "ms": ms, "detail": body[:120]}
         if sc == 407:
